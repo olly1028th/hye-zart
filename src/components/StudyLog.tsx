@@ -21,6 +21,7 @@ export default function StudyLog() {
   const [showForm, setShowForm] = useState(false);
   const [filter, setFilter] = useState<CategoryType | 'all'>('all');
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
 
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
@@ -77,7 +78,18 @@ export default function StudyLog() {
     saveStudyNotes(updated);
   }
 
-  const filtered = filter === 'all' ? notes : notes.filter(n => n.category === filter);
+  const filtered = notes.filter(n => {
+    if (filter !== 'all' && n.category !== filter) return false;
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      return (
+        n.title.toLowerCase().includes(q) ||
+        n.content.toLowerCase().includes(q) ||
+        n.tags.some(t => t.toLowerCase().includes(q))
+      );
+    }
+    return true;
+  });
 
   return (
     <div className="space-y-6">
@@ -137,6 +149,14 @@ export default function StudyLog() {
           </button>
         </div>
       )}
+
+      <input
+        type="text"
+        placeholder="제목, 내용, 태그로 검색..."
+        value={searchQuery}
+        onChange={e => setSearchQuery(e.target.value)}
+        className="w-full bg-piano-dark border border-piano-accent rounded-lg px-4 py-2.5 text-white placeholder-gray-500 focus:outline-none focus:border-piano-highlight"
+      />
 
       <div className="flex gap-2 flex-wrap">
         <button

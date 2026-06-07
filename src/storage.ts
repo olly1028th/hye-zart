@@ -3,9 +3,22 @@ import type { StudyNote, PracticeSession } from './types';
 const STUDY_NOTES_KEY = 'piano-study-notes';
 const PRACTICE_SESSIONS_KEY = 'piano-practice-sessions';
 
+function safeParse<T>(key: string, fallback: T): T {
+  try {
+    const raw = localStorage.getItem(key);
+    if (!raw) return fallback;
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return fallback;
+    return parsed as T;
+  } catch {
+    console.warn(`localStorage "${key}" 데이터 손상 — 초기값으로 대체합니다.`);
+    localStorage.removeItem(key);
+    return fallback;
+  }
+}
+
 export function loadStudyNotes(): StudyNote[] {
-  const raw = localStorage.getItem(STUDY_NOTES_KEY);
-  return raw ? JSON.parse(raw) : [];
+  return safeParse<StudyNote[]>(STUDY_NOTES_KEY, []);
 }
 
 export function saveStudyNotes(notes: StudyNote[]) {
@@ -13,8 +26,7 @@ export function saveStudyNotes(notes: StudyNote[]) {
 }
 
 export function loadPracticeSessions(): PracticeSession[] {
-  const raw = localStorage.getItem(PRACTICE_SESSIONS_KEY);
-  return raw ? JSON.parse(raw) : [];
+  return safeParse<PracticeSession[]>(PRACTICE_SESSIONS_KEY, []);
 }
 
 export function savePracticeSessions(sessions: PracticeSession[]) {
