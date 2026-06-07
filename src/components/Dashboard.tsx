@@ -1,7 +1,8 @@
 import { useMemo } from 'react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 import { useAuth } from '../context/AuthContext';
-import { loadStudyNotes, loadPracticeSessions } from '../storage';
+import { useStudyNotes } from '../hooks/useStudyNotes';
+import { usePracticeSessions } from '../hooks/usePracticeSessions';
 import { PIECES } from '../data/pieces';
 import type { StudyNote, PracticeSession } from '../types';
 import DataManager from './DataManager';
@@ -66,8 +67,8 @@ function getCategoryStats(notes: StudyNote[]) {
 
 export default function Dashboard() {
   const { user } = useAuth();
-  const notes = useMemo(loadStudyNotes, []);
-  const sessions = useMemo(loadPracticeSessions, []);
+  const { notes } = useStudyNotes();
+  const { sessions } = usePracticeSessions();
 
   const totalPracticeTime = sessions.reduce((sum, s) => sum + s.duration, 0);
   const todayStr = new Date().toISOString().slice(0, 10);

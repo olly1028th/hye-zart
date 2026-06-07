@@ -1,8 +1,8 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { loadPracticeSessions, savePracticeSessions } from '../storage';
-import type { PracticeSession } from '../types';
+import { usePracticeSessions } from '../hooks/usePracticeSessions';
 
 export default function Metronome() {
+  const { sessions, addSession, deleteSession: removeSession } = usePracticeSessions();
   const [bpm, setBpm] = useState(120);
   const [beats, setBeats] = useState(4);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -11,7 +11,6 @@ export default function Metronome() {
   const [timerRunning, setTimerRunning] = useState(false);
   const [timerSeconds, setTimerSeconds] = useState(0);
   const [memo, setMemo] = useState('');
-  const [sessions, setSessions] = useState<PracticeSession[]>(loadPracticeSessions);
 
   const audioCtxRef = useRef<AudioContext | null>(null);
   const intervalRef = useRef<number | null>(null);
@@ -80,25 +79,15 @@ export default function Metronome() {
     setTimerRunning(false);
   }
 
-  function saveSession() {
+  async function saveSession() {
     if (timerSeconds === 0) return;
-    const session: PracticeSession = {
-      id: crypto.randomUUID(),
-      date: new Date().toISOString(),
-      duration: timerSeconds,
-      memo,
-    };
-    const updated = [session, ...sessions];
-    setSessions(updated);
-    savePracticeSessions(updated);
+    await addSession({ duration: timerSeconds, memo });
     setTimerSeconds(0);
     setMemo('');
   }
 
   function deleteSession(id: string) {
-    const updated = sessions.filter(s => s.id !== id);
-    setSessions(updated);
-    savePracticeSessions(updated);
+    removeSession(id);
   }
 
   function formatTime(seconds: number): string {

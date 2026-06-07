@@ -2,6 +2,7 @@ import { useState } from 'react';
 import type { TabType } from './types';
 import { useAuth } from './context/AuthContext';
 import ErrorBoundary from './components/ErrorBoundary';
+import LoginPage from './components/LoginPage';
 import Dashboard from './components/Dashboard';
 import StudyLog from './components/StudyLog';
 import PianoKeyboard from './components/PianoKeyboard';
@@ -18,7 +19,22 @@ const TABS: { id: TabType; label: string; icon: string; shortLabel: string }[] =
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<TabType>('dashboard');
-  const { user, logout } = useAuth();
+  const { user, loading, isLoggedIn, logout, isSupabaseMode } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-piano-black flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-4xl mb-4">🎵</div>
+          <p className="text-gray-500">불러오는 중...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isLoggedIn) {
+    return <LoginPage />;
+  }
 
   return (
     <div className="min-h-screen bg-piano-black">
@@ -34,13 +50,22 @@ export default function App() {
           </div>
           {user && (
             <div className="flex items-center gap-2">
-              <span className="text-gray-400 text-xs sm:text-sm hidden sm:inline">{user.name}</span>
-              <div className="w-8 h-8 bg-piano-highlight rounded-full flex items-center justify-center text-sm text-white">
-                {user.name[0]}
+              {user.avatar ? (
+                <img src={user.avatar} alt="" className="w-8 h-8 rounded-full" />
+              ) : (
+                <div className="w-8 h-8 bg-piano-highlight rounded-full flex items-center justify-center text-sm text-white">
+                  {user.name[0]}
+                </div>
+              )}
+              <div className="hidden sm:block">
+                <p className="text-gray-300 text-sm leading-tight">{user.name}</p>
+                <p className="text-gray-600 text-xs leading-tight">
+                  {isSupabaseMode ? user.email : '로컬 모드'}
+                </p>
               </div>
               <button
                 onClick={logout}
-                className="text-gray-500 hover:text-white text-xs transition-colors cursor-pointer"
+                className="text-gray-500 hover:text-white text-xs transition-colors cursor-pointer ml-1"
               >
                 로그아웃
               </button>
