@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { usePracticeSessions } from '../hooks/usePracticeSessions';
+import { formatTime } from '../utils/format';
 
 export default function Metronome() {
   const { sessions, addSession, deleteSession: removeSession } = usePracticeSessions();
@@ -88,14 +89,6 @@ export default function Metronome() {
 
   function deleteSession(id: string) {
     removeSession(id);
-  }
-
-  function formatTime(seconds: number): string {
-    const h = Math.floor(seconds / 3600);
-    const m = Math.floor((seconds % 3600) / 60);
-    const s = seconds % 60;
-    if (h > 0) return `${h}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
-    return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
   }
 
   const totalPracticeTime = sessions.reduce((acc, s) => acc + s.duration, 0);

@@ -14,10 +14,5 @@ export interface PracticeSession {
   memo: string;
 }
 
-export interface MelodyNote {
-  key: string;
-  duration: number;
-}
-
 export type TabType = 'dashboard' | 'study' | 'keyboard' | 'metronome' | 'recommend';
 export type CategoryType = StudyNote['category'];

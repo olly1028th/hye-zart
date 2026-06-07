@@ -1,8 +1,14 @@
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import { loadStudyNotes, saveStudyNotes, loadPracticeSessions, savePracticeSessions } from '../storage';
 
 export default function DataManager() {
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [message, setMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
+
+  function showMessage(text: string, type: 'success' | 'error') {
+    setMessage({ text, type });
+    setTimeout(() => setMessage(null), 3000);
+  }
 
   function handleExport() {
     const data = {
@@ -18,6 +24,7 @@ export default function DataManager() {
     a.download = `piano-backup-${new Date().toISOString().slice(0, 10)}.json`;
     a.click();
     URL.revokeObjectURL(url);
+    showMessage('백업 파일이 다운로드되었습니다.', 'success');
   }
 
   function handleImport(e: React.ChangeEvent<HTMLInputElement>) {
@@ -29,10 +36,7 @@ export default function DataManager() {
       try {
         const data = JSON.parse(event.target?.result as string);
         if (!data.version || !Array.isArray(data.studyNotes) || !Array.isArray(data.practiceSessions)) {
-          alert('올바른 백업 파일이 아닙니다.');
-          return;
-        }
-        if (!confirm(`학습 기록 ${data.studyNotes.length}개, 연습 세션 ${data.practiceSessions.length}개를 가져올까요? 기존 데이터에 병합됩니다.`)) {
+          showMessage('올바른 백업 파일이 아닙니다.', 'error');
           return;
         }
         const existingNotes = loadStudyNotes();
@@ -46,10 +50,10 @@ export default function DataManager() {
         saveStudyNotes([...newNotes, ...existingNotes]);
         savePracticeSessions([...newSessions, ...existingSessions]);
 
-        alert(`가져오기 완료! 새 기록 ${newNotes.length}개, 새 세션 ${newSessions.length}개 추가됨.`);
-        window.location.reload();
+        showMessage(`기록 ${newNotes.length}개, 세션 ${newSessions.length}개 추가됨`, 'success');
+        setTimeout(() => window.location.reload(), 1500);
       } catch {
-        alert('파일을 읽는 중 오류가 발생했습니다.');
+        showMessage('파일을 읽는 중 오류가 발생했습니다.', 'error');
       }
     };
     reader.readAsText(file);
@@ -57,29 +61,29 @@ export default function DataManager() {
   }
 
   return (
-    <div className="bg-piano-dark rounded-xl p-6 border border-piano-accent">
-      <h3 className="text-lg font-semibold mb-4">데이터 관리</h3>
-      <div className="flex flex-col sm:flex-row gap-3">
+    <div className="bg-piano-dark rounded-xl p-4 border border-piano-accent">
+      <h3 className="text-sm font-semibold text-gray-400 mb-3">데이터 관리</h3>
+
+      {message && (
+        <div className={`mb-3 px-3 py-2 rounded-lg text-sm ${
+          message.type === 'success' ? 'bg-green-900/30 text-green-400' : 'bg-red-900/30 text-red-400'
+        }`}>
+          {message.text}
+        </div>
+      )}
+
+      <div className="flex gap-2">
         <button
           onClick={handleExport}
-          className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-medium transition-colors cursor-pointer"
+          className="flex-1 bg-piano-accent hover:bg-piano-highlight text-white py-2 rounded-lg text-sm transition-colors cursor-pointer"
         >
-          📥 백업 내보내기 (JSON)
+          📥 백업 내보내기
         </button>
-        <label className="flex-1 bg-green-600 hover:bg-green-700 text-white py-3 rounded-lg font-medium transition-colors cursor-pointer text-center">
-          📤 백업 가져오기
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept=".json"
-            onChange={handleImport}
-            className="hidden"
-          />
+        <label className="flex-1 bg-piano-accent hover:bg-piano-highlight text-white py-2 rounded-lg text-sm transition-colors cursor-pointer text-center">
+          📤 가져오기
+          <input ref={fileInputRef} type="file" accept=".json" onChange={handleImport} className="hidden" />
         </label>
       </div>
-      <p className="text-gray-600 text-xs mt-3">
-        브라우저 데이터는 캐시 삭제 시 사라질 수 있습니다. 정기적으로 백업하세요.
-      </p>
     </div>
   );
 }
