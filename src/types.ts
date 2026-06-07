@@ -19,5 +19,5 @@ export interface MelodyNote {
   duration: number;
 }
 
-export type TabType = 'study' | 'keyboard' | 'metronome';
+export type TabType = 'study' | 'keyboard' | 'metronome' | 'recommend';
 export type CategoryType = StudyNote['category'];

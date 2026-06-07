@@ -3,11 +3,13 @@ import type { TabType } from './types';
 import StudyLog from './components/StudyLog';
 import PianoKeyboard from './components/PianoKeyboard';
 import Metronome from './components/Metronome';
+import Recommend from './components/Recommend';
 
 const TABS: { id: TabType; label: string; icon: string }[] = [
   { id: 'study', label: '학습 기록', icon: '📝' },
   { id: 'keyboard', label: '건반 & 악보', icon: '🎹' },
   { id: 'metronome', label: '메트로놈', icon: '⏱️' },
+  { id: 'recommend', label: '곡 추천', icon: '🎵' },
 ];
 
 export default function App() {
@@ -48,6 +50,7 @@ export default function App() {
         {activeTab === 'study' && <StudyLog />}
         {activeTab === 'keyboard' && <PianoKeyboard />}
         {activeTab === 'metronome' && <Metronome />}
+        {activeTab === 'recommend' && <Recommend />}
       </main>
     </div>
   );
